@@ -2,7 +2,7 @@ import Head from 'next/head'
 import React from "react";
 import styles from '@/styles/Home.module.css'
 import axios from "axios";
-import {downloadBlob} from "@/pages/_utils";
+import {downloadBlob} from "@/utils";
 import { Response as ApiResponse } from './api/google-scholar';
 import Loading from "@/pages/_components/Loading";
 
@@ -86,7 +86,7 @@ export default function Home() {
                 <tr>
                   {Object.keys(searchResponse.results[0]).map(key => <th key={key}>{key}</th>)}
                 </tr>
-                {searchResponse.results.map((item: object, i) => (
+                {searchResponse.results.map((item: any, i) => (
                   <tr key={i}>
                     {Object.keys(searchResponse.results[0]).map(key => (
                       <td key={key}>{typeof item[key] === 'object' ? item[key].v : item[key]}</td>
