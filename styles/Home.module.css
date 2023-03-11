@@ -7,13 +7,16 @@
   min-height: 100vh;
 }
 
-.description {
-  display: inherit;
-  justify-content: inherit;
-  align-items: inherit;
-  font-size: 0.85rem;
-  max-width: var(--max-width);
+.header {
   width: 100%;
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+}
+
+.accountInfo {
+  display: flex;
+  gap: 15px;
 }
 
 .center {

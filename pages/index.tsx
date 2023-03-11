@@ -2,14 +2,26 @@ import Head from 'next/head'
 import React from "react";
 import styles from '@/styles/Home.module.css'
 import axios from "axios";
-import {downloadBlob} from "@/utils";
-import { Response as ApiResponse } from './api/google-scholar';
-import Loading from "@/pages/_components/Loading";
+import { downloadBlob } from "@/utils";
+import { Response as GoogleScholarApiResponse } from './api/google-scholar';
+import { Response as AccountInfoApiResponse } from './api/account-info';
+import Loading from "@/components/Loading";
+import ExportExcel from "@/components/ExportExcel";
 
 export default function Home() {
   const [query, setQuery] = React.useState('');
+  const [accountInfo, setAccountInfo] = React.useState<AccountInfoApiResponse | null>(null);
   const [loading, setLoading] = React.useState(false);
-  const [searchResponse, setSearchResponse] = React.useState<ApiResponse | null>(null);
+  const [searchResponse, setSearchResponse] = React.useState<GoogleScholarApiResponse | null>(null);
+
+  React.useEffect(() => {
+    getAccountInfo();
+  }, [])
+
+  async function getAccountInfo() {
+    const { data } = await axios('/api/account-info');
+    setAccountInfo(data);
+  }
 
   async function search() {
     try {
@@ -29,25 +41,6 @@ export default function Home() {
     }
   }
 
-  async function downloadExcel() {
-    try {
-      setLoading(true);
-      const {data} = await axios('/api/google-scholar', {
-        responseType: 'blob',
-        params: {
-          q: query,
-          num: 500,
-          format: 'EXCEL',
-        }
-      })
-      downloadBlob(data, 'google-scholar.xlsx');
-    } catch (e) {
-      console.log('error in api call', e)
-    } finally {
-      setLoading(false);
-    }
-  }
-
   return (
     <>
       <Head>
@@ -57,14 +50,21 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className={styles.main}>
-        <div className={styles.description}>
-          Enter the Search
+        <div className={styles.header}>
+          <div className={styles.description}>
+            Enter the Search
+          </div>
+          {accountInfo && (
+            <div className={styles.accountInfo}>
+              <div>Available Search Records:</div>
+              <div>{accountInfo.plan_searches_left * 20}</div>
+            </div>
+          )}
         </div>
-
         <div className={styles.center}>
           <input value={query} onChange={e => setQuery(e.target.value)} placeholder="search text"/>
           <button onClick={search} disabled={loading}>🔎</button>
-          <button onClick={downloadExcel} disabled={loading}>📓</button>
+          <ExportExcel loading={loading} setLoading={setLoading} query={query} onDownload={getAccountInfo} />
         </div>
 
         {loading && <Loading />}
