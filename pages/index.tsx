@@ -20,7 +20,7 @@ export default function Home() {
   React.useEffect(() => {
     getAccountInfo();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedAccount])
+  }, [selectedAccount, searchResponse])
 
   async function getAccountInfo() {
     try {
@@ -74,7 +74,7 @@ export default function Home() {
         <div className={styles.center}>
           <input value={query} onChange={e => setQuery(e.target.value)} placeholder="search text"/>
           <button onClick={search} disabled={loading}>🔎</button>
-          <ExportExcel loading={loading} setLoading={setLoading} query={query} onDownload={getAccountInfo} />
+          <ExportExcel loading={loading} setLoading={setLoading} query={query} onDownload={getAccountInfo} maxNumOfRecords={(accountInfo?.plan_searches_left ?? 0) * 20} />
         </div>
 
         {loading && <Loading />}
