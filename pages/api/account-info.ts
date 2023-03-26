@@ -1,7 +1,12 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from 'next'
 import axios from 'axios';
-import * as xlsx from 'xlsx';
+import {getApiKey} from "@/pages/api/google-scholar";
+
+type Query = {
+  apiEmail?: string,
+  apiKey?: string,
+}
 
 export type Response = {
   "searches_per_month": number,
@@ -17,7 +22,9 @@ export default async function handler(
   res: NextApiResponse<Response>
 ) {
   try {
-    const accountInfo = await getAccountInfo();
+    const { apiEmail, apiKey } = req.query as Query;
+    const finalApiKey = getApiKey(apiEmail, apiKey);
+    const accountInfo = await getAccountInfo(finalApiKey);
     res.status(200).json(accountInfo);
   } catch (e) {
     // @ts-ignore
@@ -25,10 +32,10 @@ export default async function handler(
   }
 }
 
-async function getAccountInfo() {
+async function getAccountInfo(apiKey: string) {
   const { data } = await axios('https://serpapi.com/account', {
     params: {
-      api_key: '7846c5a6d1babed69b51d57684bb946bc041b1408d5f290885835fb79a5a783b',
+      api_key: apiKey,
     }
   })
   return data;

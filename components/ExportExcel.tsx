@@ -48,7 +48,7 @@ export default function ExportExcel({ loading, setLoading, query, onDownload }: 
               number of records:
             </div>
             <select value={numOfRecords} onChange={e => setNumOfRecords(e.target.value)} placeholder="search text">
-              {[...Array(25)]
+              {[...Array(100)]
                 .map((_, i) => String((i + 1) * 20))
                 .map(num => <option key={num} value={num}>{num}</option>)
               }

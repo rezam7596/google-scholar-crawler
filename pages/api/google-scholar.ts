@@ -2,11 +2,14 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import axios from 'axios';
 import * as xlsx from 'xlsx';
+import {accounts} from "@/utils";
 
 type Query = {
   q: string
   num: string,
   format: string,
+  apiEmail?: string,
+  apiKey?: string,
 }
 
 export type Response = {
@@ -28,8 +31,9 @@ export default async function handler(
   res: NextApiResponse<Response>
 ) {
   try {
-    const { q, num = '20', format = 'JSON' } = req.query as Query;
-    const googleResult = await getGoogleScholarResultBatch(q, Number(num));
+    const { q, num = '20', format = 'JSON', apiEmail, apiKey } = req.query as Query;
+    const finalApiKey = getApiKey(apiEmail, apiKey);
+    const googleResult = await getGoogleScholarResultBatch(q, Number(num), finalApiKey);
     const formattedData = getFormattedData(googleResult);
     if (format === OutputFormat.JSON) {
       res.status(200).json({ results: formattedData, searchInformation: googleResult.search_information })
@@ -51,12 +55,12 @@ function objectToExcel(rows: Array<object>) {
   return xlsx.write(workbook, { type: "buffer", bookType: "xlsx" });
 }
 
-async function getGoogleScholarResultBatch(q: string, num: number) {
+async function getGoogleScholarResultBatch(q: string, num: number, apiKey: string) {
   const ITEMS_PER_PAGE = 20;
   const numOfPages: number = Math.ceil(num / ITEMS_PER_PAGE);
   const requestsResult = await Promise.all([...Array(numOfPages)].map(async (_, index) => {
     // return getGoogleResultMock();
-    return getGoogleScholarResult(q, index * ITEMS_PER_PAGE);
+    return getGoogleScholarResult(q, index * ITEMS_PER_PAGE, ITEMS_PER_PAGE, apiKey);
   }))
   return requestsResult.reduce(
     (out, result) => (
@@ -66,14 +70,14 @@ async function getGoogleScholarResultBatch(q: string, num: number) {
   )
 }
 
-async function getGoogleScholarResult(q: string, start: number, num = 20) {
+async function getGoogleScholarResult(q: string, start: number, num: number, apiKey: string) {
   const { data } = await axios('https://serpapi.com/search', {
     params: {
       q,
       start,
       num,
       engine: 'google_scholar',
-      api_key: '7846c5a6d1babed69b51d57684bb946bc041b1408d5f290885835fb79a5a783b',
+      api_key: apiKey,
     }
   })
   return data;
@@ -91,6 +95,12 @@ function getFormattedData(data: any) {
     Summary: result.publication_info.summary,
     Snippet: result.snippet,
   }))
+}
+
+export function getApiKey(apiEmail: string | undefined, apiKey: string | undefined) {
+  if (apiKey) return apiKey;
+  const selectedAccount = accounts.find(account => account.email === apiEmail)
+  return selectedAccount?.apiKey || accounts[0].apiKey;
 }
 
 function getGoogleResultMock() {

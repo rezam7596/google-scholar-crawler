@@ -2,25 +2,36 @@ import Head from 'next/head'
 import React from "react";
 import styles from '@/styles/Home.module.css'
 import axios from "axios";
-import { downloadBlob } from "@/utils";
 import { Response as GoogleScholarApiResponse } from './api/google-scholar';
 import { Response as AccountInfoApiResponse } from './api/account-info';
 import Loading from "@/components/Loading";
 import ExportExcel from "@/components/ExportExcel";
+import {accounts} from "@/utils";
+import SelectAccount from "@/components/SelectAccount";
 
 export default function Home() {
   const [query, setQuery] = React.useState('');
   const [accountInfo, setAccountInfo] = React.useState<AccountInfoApiResponse | null>(null);
+  const [selectedAccount, setSelectedAccount] = React.useState<string>(accounts[0].email);
   const [loading, setLoading] = React.useState(false);
+  const [accountLoading, setAccountLoading] = React.useState(false);
   const [searchResponse, setSearchResponse] = React.useState<GoogleScholarApiResponse | null>(null);
 
   React.useEffect(() => {
     getAccountInfo();
-  }, [])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedAccount])
 
   async function getAccountInfo() {
-    const { data } = await axios('/api/account-info');
-    setAccountInfo(data);
+    try {
+      setAccountLoading(true);
+      const {data} = await axios('/api/account-info', {params: {apiEmail: selectedAccount}});
+      setAccountInfo(data);
+      setAccountLoading(false);
+    } catch (e) {
+      console.error(e);
+      setAccountLoading(false);
+    }
   }
 
   async function search() {
@@ -54,12 +65,11 @@ export default function Home() {
           <div className={styles.description}>
             Enter the Search
           </div>
-          {accountInfo && (
-            <div className={styles.accountInfo}>
-              <div>Available Search Records:</div>
-              <div>{accountInfo.plan_searches_left * 20}</div>
-            </div>
-          )}
+          <div className={styles.accountInfo}>
+            <div>Available Search Records:</div>
+            <div>{(accountLoading || !accountInfo) ? '...' : accountInfo.plan_searches_left * 20}</div>
+            <SelectAccount selectedAccount={selectedAccount} setSelectedAccount={setSelectedAccount} />
+          </div>
         </div>
         <div className={styles.center}>
           <input value={query} onChange={e => setQuery(e.target.value)} placeholder="search text"/>
