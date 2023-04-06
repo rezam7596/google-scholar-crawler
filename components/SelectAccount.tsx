@@ -1,11 +1,26 @@
 import React from "react";
 import Modal from 'react-modal';
 import axios from "axios";
-import {accounts, downloadBlob} from "@/utils";
 import styles from './ExportExcel.module.css';
+import {AccountType} from "@/utils/accounts";
 
 export default function SelectAccount({ selectedAccount, setSelectedAccount }: { selectedAccount: string, setSelectedAccount: Function }) {
   const [modalIsOpen, setModalIsOpen] = React.useState(false);
+  const [accounts, setAccounts] = React.useState<Array<AccountType>>([]);
+
+  React.useEffect(() => {
+    getAccounts();
+  }, [])
+
+  async function getAccounts() {
+    try {
+      const {data} = await axios('/api/get-available-accounts');
+      setAccounts(data);
+      setSelectedAccount(data[0])
+    } catch (e) {
+      console.error(e);
+    }
+  }
 
   return (
     <>
@@ -27,7 +42,7 @@ export default function SelectAccount({ selectedAccount, setSelectedAccount }: {
             </div>
             <select value={selectedAccount} onChange={e => setSelectedAccount(e.target.value)}>
               {
-                accounts.map(account => <option key={account.email} value={account.email}>{account.email}</option>)
+                accounts.map(account => <option key={account.email} value={account.email}>{account.title} ({account.email})</option>)
               }
             </select>
           </div>

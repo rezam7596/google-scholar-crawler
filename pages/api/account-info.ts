@@ -1,7 +1,7 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from 'next'
 import axios from 'axios';
-import {getApiKey} from "@/pages/api/google-scholar";
+import {getApiKey} from "@/utils/accounts";
 
 type Query = {
   apiEmail?: string,

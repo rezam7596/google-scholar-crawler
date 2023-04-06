@@ -2,7 +2,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import axios from 'axios';
 import * as xlsx from 'xlsx';
-import {accounts} from "@/utils";
+import {getApiKey} from "@/utils/accounts";
 
 type Query = {
   q: string
@@ -95,12 +95,6 @@ function getFormattedData(data: any) {
     Summary: result.publication_info.summary,
     Snippet: result.snippet,
   }))
-}
-
-export function getApiKey(apiEmail: string | undefined, apiKey: string | undefined) {
-  if (apiKey) return apiKey;
-  const selectedAccount = accounts.find(account => account.email === apiEmail)
-  return selectedAccount?.apiKey || accounts[0].apiKey;
 }
 
 function getGoogleResultMock() {

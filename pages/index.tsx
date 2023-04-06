@@ -6,19 +6,21 @@ import { Response as GoogleScholarApiResponse } from './api/google-scholar';
 import { Response as AccountInfoApiResponse } from './api/account-info';
 import Loading from "@/components/Loading";
 import ExportExcel from "@/components/ExportExcel";
-import {accounts} from "@/utils";
 import SelectAccount from "@/components/SelectAccount";
+import AddAccount from "@/components/AddAccount";
 
 export default function Home() {
   const [query, setQuery] = React.useState('');
   const [accountInfo, setAccountInfo] = React.useState<AccountInfoApiResponse | null>(null);
-  const [selectedAccount, setSelectedAccount] = React.useState<string>(accounts[0].email);
+  const [selectedAccount, setSelectedAccount] = React.useState<string>(null);
   const [loading, setLoading] = React.useState(false);
   const [accountLoading, setAccountLoading] = React.useState(false);
   const [searchResponse, setSearchResponse] = React.useState<GoogleScholarApiResponse | null>(null);
 
   React.useEffect(() => {
-    getAccountInfo();
+    if (selectedAccount) {
+      getAccountInfo();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedAccount, searchResponse])
 
@@ -68,6 +70,7 @@ export default function Home() {
           <div className={styles.accountInfo}>
             <div>Available Search Records:</div>
             <div>{(accountLoading || !accountInfo) ? '...' : accountInfo.plan_searches_left * 20}</div>
+            <AddAccount />
             <SelectAccount selectedAccount={selectedAccount} setSelectedAccount={setSelectedAccount} />
           </div>
         </div>
