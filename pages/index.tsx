@@ -12,7 +12,7 @@ import AddAccount from "@/components/AddAccount";
 export default function Home() {
   const [query, setQuery] = React.useState('');
   const [accountInfo, setAccountInfo] = React.useState<AccountInfoApiResponse | null>(null);
-  const [selectedAccount, setSelectedAccount] = React.useState<string>(null);
+  const [selectedAccount, setSelectedAccount] = React.useState<string>('');
   const [loading, setLoading] = React.useState(false);
   const [accountLoading, setAccountLoading] = React.useState(false);
   const [searchResponse, setSearchResponse] = React.useState<GoogleScholarApiResponse | null>(null);

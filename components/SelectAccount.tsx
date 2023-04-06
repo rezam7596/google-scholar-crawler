@@ -16,7 +16,7 @@ export default function SelectAccount({ selectedAccount, setSelectedAccount }: {
     try {
       const {data} = await axios('/api/get-available-accounts');
       setAccounts(data);
-      setSelectedAccount(data[0])
+      setSelectedAccount(data[0]?.email)
     } catch (e) {
       console.error(e);
     }
